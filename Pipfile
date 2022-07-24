@@ -4,8 +4,8 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+python-dotenv = "*"
 aiogram = "*"
-googletrans = "==4.0.0-rc1"
 
 [dev-packages]
 
