@@ -5,7 +5,7 @@ from aiogram.dispatcher.filters import CommandStart, CommandHelp
 from states import User,Reklama_audio,Reklama_fayl as Reklama_file,Reklama_gif,Reklama_video,Reklama_photo
 from loader import bot
 from aiogram.dispatcher import FSMContext
-from replybuttons import keyboard_kontakt, keyboard_admin_menu_1,keyboard_admin_rozibolish
+from replybuttons import keyboard_kontakt, keyboard_admin_menu_1,keyboard_admin_rozibolish,keyboard_user_menu_1
 from inlinebuttons import keyboard_admin_menu_2
 from baza import baseadd, basereturnlen, basereturnids
 from translator import translator
@@ -23,14 +23,15 @@ async def start(message:types.Message):
 
 #royxatdan otish
 @dp.message_handler(state=User.user_contact,content_types=types.ContentType.CONTACT)
-async def sendcontact(message:types.Contact,state:FSMContext):
+async def sendcontact(message:types.Message,state:FSMContext):
     ba = message.values
-    full_name = str(ba['contact']["first_name"]+ba['contact']["last_name"])
-    user_id = str(ba['contact']["user_id"])
-    tel_number = str(ba['contact']['phone_number'])
+    full_name = message.contact.full_name#str(ba['contact']["first_name"]+ba['contact']["last_name"])
+    user_id = message.from_user.id#str(ba['contact']["user_id"])
+    tel_number = message.contact.phone_number#str(ba['contact']['phone_number'])
     baseadd(user_id,full_name,user_id,tel_number)
-    User.user_contact=ba
-    await bot.send_message(user_id,text='Matnni jo\'natishingiz mumkin')
+    User.user_contact=message.contact
+    await state.finish()
+    await bot.send_message(user_id,text='Matnni jo\'natishingiz mumkin',reply_markup=keyboard_user_menu_1)
 
 #reklama
 #foto
@@ -233,12 +234,14 @@ async def els(message:types.Message):
          await message.answer('salomadmin botga hush kelibsiz!',reply_markup=keyboard_admin_menu_2,)
     elif message.text == 'Reklama berish':
         await message.answer('admin @mal_un')
+    elif message.text == '👨‍💻Dasturchi malumoti👨‍💻':
+        await message.answer('ism: Jamshidbek\nfamiliya: Ollanazarov\nyoshi: 18\nma\'lumoti: Tugallanmagan oliy\nuser: @mal_un\no\'qish joyi:TATU\nTelegram tarmog\'idagi loyihalar:\n@tarjimon_ingliz_uzbek_ingliz_bot\n@download_youtube_download_bot\n@ramazon_vaqtlari_uzb_bot\n@WIKI_SEARCH_UZ_MAL_BOT\n@IMLO_TEST_UZB_BOT')
     else:
         text = message.text
         tarjima_text, holat = translator(text)
         rt = 'admin: @mal_un'
         if holat == 'en_uz':
-            rt = f"**en-uz**\nen:\n\n{text}\n_ _ _ _\nuz:\n\n{tarjima_text}"
+            rt = f"**🇬🇧-🇺🇿**\n🇬🇧:\n\n{text}\n_ _ _ _\n🇺🇿:\n\n{tarjima_text}"
         elif holat == 'uz_en':
-            rt = f"**uz-en**\nuz:\n{text}\n\n_ _ _ _\n\nen:\n{tarjima_text}"
+            rt = f"**🇺🇿-🇬🇧**\n🇺🇿:\n{text}\n\n_ _ _ _\n\n🇬🇧:\n{tarjima_text}"
         await message.answer(rt)

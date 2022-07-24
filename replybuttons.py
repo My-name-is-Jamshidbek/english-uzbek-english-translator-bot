@@ -19,3 +19,8 @@ keyboard_admin_rozibolish.add(
     KeyboardButton(text='Tasdiqlash'),
     KeyboardButton(text='Bekor qilish'),
 )
+
+keyboard_user_menu_1 = ReplyKeyboardMarkup(resize_keyboard=True)
+keyboard_user_menu_1.add(
+    KeyboardButton(text='👨‍💻Dasturchi malumoti👨‍💻'),
+)
