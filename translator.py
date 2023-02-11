@@ -1,7 +1,45 @@
+import os
+
 from googletrans import Translator
+import soundfile as sf
+import speech_recognition as sr
+from pytesseract import pytesseract
+from PIL import Image
+import cv2
+
+def speach_text(audio,_id):
+    try:
+        # Create a Recognizer object
+        OGG_FILE = audio
+        #     print(1)
+        #     # ovozli habar faylini .wav formatiga aylantirish
+        data, samplerate = sf.read(OGG_FILE)
+        sf.write('data/voices/'+str(_id)+"1.wav", data, samplerate)
+        #
+        os.remove(audio)
+        r = sr.Recognizer()
+
+        # Read the audio file
+        with sr.AudioFile('data/voices/'+str(_id)+"1.wav") as source:
+            audio = r.record(source)
+
+        # Transcribe the audio
+        text = r.recognize_google(audio)
+        os.remove('data/voices/'+str(_id)+"1.wav")
+        return text
+    except:
+        return "No speach"
+
+def photo_text(imgn):
+    try:
+        img = Image.open(imgn)
+        text = pytesseract.image_to_string(img)
+        os.remove(imgn)
+        return text
+    except:return "so'z topilmadi"
 
 
-def translator(text):
+def translator_text(text):
     trans = Translator()
     holat = trans.detect(text).lang
     if holat == 'uz':
@@ -25,4 +63,4 @@ def translator(text):
         else:
             holat = 'uz_en'
             rt = trans.translate(text=text, dest='en', src='uz').text
-    return [rt,holat]
+    return f"{text}\nTRANSLATION:\n{rt}"

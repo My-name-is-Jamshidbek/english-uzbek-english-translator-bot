@@ -1,3 +1,4 @@
+from datetime import datetime
 from aiogram import types
 from loader import dp
 from config import ADMIN_ID
@@ -8,30 +9,36 @@ from aiogram.dispatcher import FSMContext
 from replybuttons import keyboard_kontakt, keyboard_admin_menu_1,keyboard_admin_rozibolish,keyboard_user_menu_1
 from inlinebuttons import keyboard_admin_menu_2
 from baza import baseadd, basereturnlen, basereturnids
-from translator import translator
-
+from translator import translator_text, photo_text, speach_text
+import time
 #start
 @dp.message_handler(CommandStart())
 async def start(message:types.Message):
     if str(message.from_user.id) == str(ADMIN_ID):
         await message.answer('salomadmin botga hush kelibsiz!', reply_markup=keyboard_admin_menu_1, )
     else:
-        await message.answer(f"salom {message.from_user.full_name} botga hush kelibsiz!\nBot ishlashi uchun kontaktingizni ulashing!!",reply_markup=keyboard_kontakt)
-        User.user_id=message.from_user.id
+        await message.answer(f"Salom {message.from_user.full_name} botga hush kelibsiz!\nBot ishlashi uchun "
+                             f"kontaktingizni ulashing!!",reply_markup=keyboard_kontakt)
         await User.user_contact.set()
 
 
 #royxatdan otish
 @dp.message_handler(state=User.user_contact,content_types=types.ContentType.CONTACT)
 async def sendcontact(message:types.Message,state:FSMContext):
-    ba = message.values
-    full_name = message.contact.full_name#str(ba['contact']["first_name"]+ba['contact']["last_name"])
-    user_id = message.from_user.id#str(ba['contact']["user_id"])
-    tel_number = message.contact.phone_number#str(ba['contact']['phone_number'])
-    baseadd(user_id,full_name,user_id,tel_number)
-    User.user_contact=message.contact
-    await state.finish()
-    await bot.send_message(user_id,text='Matnni jo\'natishingiz mumkin',reply_markup=keyboard_user_menu_1)
+    try:
+        ba = message.values
+        full_name = message.contact.full_name#str(ba['contact']["first_name"]+ba['contact']["last_name"])
+        user_id = message.from_user.id#str(ba['contact']["user_id"])
+        tel_number = message.contact.phone_number#str(ba['contact']['phone_number'])
+        baseadd(user_id,full_name,user_id,tel_number)
+        await state.finish()
+        await bot.send_message(user_id,text='Text, Voice, Photo jo\'natishingiz mumkin',
+                               reply_markup=keyboard_user_menu_1)
+    except:
+        await state.finish()
+        await bot.send_message(user_id, text='Text, Voice, Photo jo\'natishingiz mumkin',
+                               reply_markup=keyboard_user_menu_1)
+
 
 #reklama
 #foto
@@ -228,20 +235,59 @@ async def reklama(call: types.callback_query,state:FSMContext):
 
 
 #qolgan matnlar
-@dp.message_handler()
-async def els(message:types.Message):
-    if str(message.from_user.id) == str(ADMIN_ID) and message.text == 'Reklama berish':
-         await message.answer('salomadmin botga hush kelibsiz!',reply_markup=keyboard_admin_menu_2,)
-    elif message.text == 'Reklama berish':
-        await message.answer('admin @mal_un')
-    elif message.text == '👨‍💻Dasturchi malumoti👨‍💻':
-        await message.answer('ism: Jamshidbek\nfamiliya: Ollanazarov\nyoshi: 18\nma\'lumoti: Tugallanmagan oliy\nuser: @mal_un\no\'qish joyi:TATU\nTelegram tarmog\'idagi loyihalar:\n@tarjimon_ingliz_uzbek_ingliz_bot\n@download_youtube_download_bot\n@ramazon_vaqtlari_uzb_bot\n@WIKI_SEARCH_UZ_MAL_BOT\n@IMLO_TEST_UZB_BOT')
-    else:
-        text = message.text
-        tarjima_text, holat = translator(text)
-        rt = 'admin: @mal_un'
-        if holat == 'en_uz':
-            rt = f"**🇬🇧-🇺🇿**\n🇬🇧:\n\n{text}\n_ _ _ _\n🇺🇿:\n\n{tarjima_text}"
-        elif holat == 'uz_en':
-            rt = f"**🇺🇿-🇬🇧**\n🇺🇿:\n{text}\n\n_ _ _ _\n\n🇬🇧:\n{tarjima_text}"
-        await message.answer(rt)
+@dp.message_handler(content_types=[types.ContentType.TEXT, types.ContentType.PHOTO, types.ContentType.VOICE])
+async def els(m:types.Message):
+    text = False
+    try:
+        if m.voice:
+            file_id = m.voice.file_id
+            file = await bot.get_file(file_id)
+            file_path = file.file_path
+            await bot.download_file(file_path, "data/voices/"+str(file_id)+".mp3")
+            time.sleep(5)
+            text = speach_text("data/voices/"+str(file_id)+".mp3",m.from_user.id)
+        elif m.text:
+            if str(m.from_user.id) == str(ADMIN_ID) and m.text == 'Reklama berish':
+                await m.answer('salomadmin botga hush kelibsiz!', reply_markup=keyboard_admin_menu_2, )
+            elif m.text == 'Reklama berish':
+                await m.answer('admin @mal_un')
+            elif m.text == '👨‍💻Dasturchi malumoti👨‍💻':
+                month = 12
+                day = 29
+                year = 2003
+                year_now = datetime.now().year
+                month_now = datetime.now().month
+                day_now = datetime.now().day
+                datetime_now = datetime.strptime(f"{year_now}/{month_now}/{day_now}", '%Y/%m/%d')  # datetime.now()
+                datetime_ = datetime.strptime(f"{year}/{month}/{day}", '%Y/%m/%d')
+                old = datetime_now-datetime_
+                await m.answer(text=f"ism: Jamshidbek\n"
+                                    f"familiya: Ollanazarov\n"
+                                    f"yoshi: {old.days // 365} yil {old.days % 365} kun.\n"
+                                    f"ma\'lumoti: Tugallanmagan oliy\n"
+                                    f"username: @mal_un\n"
+                                    f"o\'qish joyi:TATU\n"
+                                    f"Telegram tarmog\'idagi loyihalar:\n"
+                                    f"@Uz_Translate_En_Bot\n"
+                                    f"@talk_mate_bot\n"
+                                    f"@UBTUITCurriculumBot\n"
+                                    f"@tarjimon_ingliz_uzbek_ingliz_bot\n"
+                                    f"@download_youtube_download_bot\n"
+                                    f"@ramazon_vaqtlari_uzb_bot\n"
+                                    f"@WIKI_SEARCH_UZ_MAL_BOT\n"
+                                    f"@IMLO_TEST_UZB_BOT")
+            else:
+                text = m.text
+        elif m.photo:
+            file_id = m.photo[0].file_id
+            file = await bot.get_file(file_id)
+            file_path = file.file_path
+            await bot.download_file(file_path, "data/photos/" + str(file_id) + ".jpg")
+            time.sleep(5)
+            text = photo_text("data/photos/" + str(file_id) + ".jpg")
+    except Exception as e:
+        print(e)
+        text = "Message not found!!"
+    if text:
+        text = translator_text(text)
+        await m.answer(text, reply_markup=keyboard_user_menu_1)
