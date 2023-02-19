@@ -4,11 +4,13 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-python-dotenv = "*"
 aiogram = "*"
-googletrans = "==4.0.0-rc1"
+gtts = "*"
+pytesseract = "*"
+googletrans = "==4.0.0rc1"
+cffi = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.9"
+python_version = "3.11"

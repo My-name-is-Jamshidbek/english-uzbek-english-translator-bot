@@ -1,11 +1,10 @@
 import os
-
+from gtts import gTTS
 from googletrans import Translator
 import soundfile as sf
 import speech_recognition as sr
 from pytesseract import pytesseract
 from PIL import Image
-import cv2
 
 def speach_text(audio,_id):
     try:
@@ -63,4 +62,16 @@ def translator_text(text):
         else:
             holat = 'uz_en'
             rt = trans.translate(text=text, dest='en', src='uz').text
-    return f"{text}\nTRANSLATION:\n{rt}"
+    return {'text':"{text}\nTRANSLATION:\n{rt}",'type':holat}
+
+
+def word_audio(word):
+    """
+    :param words:
+    :return:
+    """
+    # ovozli habar yaratish
+    tts = gTTS(word)
+    # ovozli habarni saqlash
+    tts.save(f"data/audio/{word}.mp3")
+    return f"data/audio/"+word+".mp3"

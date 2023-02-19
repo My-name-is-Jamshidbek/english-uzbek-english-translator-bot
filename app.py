@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 from aiogram import types
 from loader import dp
@@ -9,7 +10,7 @@ from aiogram.dispatcher import FSMContext
 from replybuttons import keyboard_kontakt, keyboard_admin_menu_1,keyboard_admin_rozibolish,keyboard_user_menu_1
 from inlinebuttons import keyboard_admin_menu_2
 from baza import baseadd, basereturnlen, basereturnids
-from translator import translator_text, photo_text, speach_text
+from translator import translator_text, photo_text, speach_text, word_audio
 import time
 #start
 @dp.message_handler(CommandStart())
@@ -290,4 +291,10 @@ async def els(m:types.Message):
         text = "Message not found!!"
     if text:
         text = translator_text(text)
-        await m.answer(text, reply_markup=keyboard_user_menu_1)
+        if 'uz_en' == text['type']:
+            voice = word_audio(text['text'])
+            await m.answer(text['text'], reply_markup=keyboard_user_menu_1)
+            await m.answer_voice(voice=voice)
+            os.remove(voice)
+        else:
+            await m.answer(text['text'], reply_markup=keyboard_user_menu_1)
