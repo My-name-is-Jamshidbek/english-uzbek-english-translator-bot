@@ -1,6 +1,8 @@
 import os
 from datetime import datetime
 from aiogram import types
+from aiogram.types import InputFile
+
 from loader import dp
 from config import ADMIN_ID
 from aiogram.dispatcher.filters import CommandStart, CommandHelp
@@ -292,9 +294,19 @@ async def els(m:types.Message):
     if text:
         text = translator_text(text)
         if 'uz_en' == text['type']:
-            voice = word_audio(text['text'])
-            await m.answer(text['text'], reply_markup=keyboard_user_menu_1)
-            await m.answer_voice(voice=voice)
-            os.remove(voice)
+            try:
+                voice1 = word_audio(text['text'], t=1)
+                voice = InputFile(voice1)
+                await m.reply_voice(voice=voice, caption=text['text'])
+            except Exception as e:
+                await m.reply(text['text'], reply_markup=keyboard_user_menu_1)
+                print(e)
         else:
-            await m.answer(text['text'], reply_markup=keyboard_user_menu_1)
+            try:
+                voice1 = word_audio(m.text, t=0)
+                voice = InputFile(voice1)
+                await m.reply_voice(voice=voice, caption=text['text'])
+            except Exception as e:
+                await m.reply(text['text'], reply_markup=keyboard_user_menu_1)
+                print(e)
+        os.remove(voice1)

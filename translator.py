@@ -1,4 +1,6 @@
 import os
+import time
+
 from gtts import gTTS
 from googletrans import Translator
 import soundfile as sf
@@ -62,15 +64,16 @@ def translator_text(text):
         else:
             holat = 'uz_en'
             rt = trans.translate(text=text, dest='en', src='uz').text
-    return {'text':"{text}\nTRANSLATION:\n{rt}",'type':holat}
+    return {'text':f" TRANSLATION:\n{rt}",'type':holat}
 
 
-def word_audio(word):
+def word_audio(word, t):
     """
     :param words:
     :return:
     """
     # ovozli habar yaratish
+    word = word.split('TRANSLATION:\n')[t]
     tts = gTTS(word)
     # ovozli habarni saqlash
     tts.save(f"data/audio/{word}.mp3")
